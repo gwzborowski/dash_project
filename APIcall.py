@@ -1,7 +1,7 @@
 # ============================================================
 # Mini Finance Dashboard — Crypto vs. Traditional Equity
-# Team #: [FILL IN]
-# Members: [FILL IN NAMES]
+# Team #: 3
+# Members: Gavin Zborowski, Evie Trinh, Alex Bailey
 #
 # Question / Story:
 #   How does Bitcoin's volatility compare to a blue-chip stock
