@@ -94,7 +94,44 @@ label{
 
 .controls-box{ padding-bottom: 10px; }
 
+/* Quick-jump preset buttons */
+.preset-radio{
+  display: flex;
+  gap: 10px;
+  margin: 6px 0 18px;
+  flex-wrap: wrap;
+}
+.preset-radio label{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-page);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.preset-radio label:hover{ border-color: var(--gold); }
+.preset-radio input{ accent-color: var(--gold); }
+
 .chart-box{ padding: 14px; }
+
+/* Plain-English insight panel */
+.insight-box p{
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+.insight-box p:last-child{ margin-bottom: 0; }
+.insight-highlight{
+  font-weight: 700;
+  color: var(--gold) !important;
+}
 
 .image-box img{
   display: block;
@@ -158,8 +195,10 @@ div[class*="-ValueContainer"] *{
 .rc-slider-mark-text{ color: var(--text-dim) !important; font-size: 11px; }
 .rc-slider-tooltip-inner{ color: var(--navy) !important; }
 
-/* Timestamp/value boxes at the ends of the range slider */
+/* Hide the raw timestamp input boxes rc-slider renders at each end —
+   the formatted month marks along the track are enough on their own */
 .controls-box input[type="text"],
-.controls-box input[type="number"]{
-  color: var(--navy) !important;
+.controls-box input[type="number"],
+.rc-slider-tooltip{
+  display: none !important;
 }

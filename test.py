@@ -112,22 +112,31 @@ date_marks = {
     for d in pd.date_range(date_min, date_max, periods=6)
 }
 
+# Plain-language names so people who don't follow the stock market
+# can still tell what's being compared
+FRIENDLY = {
+    "BTC-USD": "Bitcoin",
+    "AAPL": "Apple",
+    "SPY": "the overall stock market (S&P 500)",
+}
+
 app.layout = html.Div(
     className="page",
     children=[
         html.Div(
             className="wrap",
             children=[
-                html.H1("Bitcoin vs. Apple — a tale of two volatilities", className="page-title"),
+                html.H1("Bitcoin vs. Apple — A Tale of Two Volatilities", className="page-title"),
 
                 html.Div(
                     className="box intro-box",
                     children=[
                         html.P(
-                            "This dashboard compares Bitcoin's price swings to Apple stock "
-                            "(and, optionally, the S&P 500) over the past year, showing how "
-                            "much more dramatic crypto volatility is compared to a blue-chip "
-                            "equity or the broader market."
+                            "Ever wonder why Bitcoin headlines are always so dramatic? This chart "
+                            "shows you why — it lines up Bitcoin's price next to Apple, one of the "
+                            "world's steadiest stocks, so you can watch the difference for yourself. "
+                            "No finance background needed: just pick a view below and see how wild "
+                            "(or calm) each one gets."
                         ),
                     ],
                 ),
@@ -139,32 +148,47 @@ app.layout = html.Div(
                             style={"display": "flex", "gap": "24px", "flexWrap": "wrap", "marginBottom": 16},
                             children=[
                                 html.Div([
-                                    html.Label("View:"),
+                                    html.Label("View:", title="Choose how you want to compare the two"),
                                     dcc.Dropdown(
                                         id="view-dropdown",
                                         options=[
-                                            {"label": "Normalized % Price Change", "value": "normalized"},
-                                            {"label": "30-Day Rolling Volatility", "value": "volatility"},
+                                            {"label": "📈 Price change over time", "value": "normalized"},
+                                            {"label": "🎢 How bumpy the ride was", "value": "volatility"},
                                         ],
                                         value="normalized",
                                         clearable=False,
-                                        style={"width": 260},
+                                        style={"width": 280},
                                     ),
                                 ]),
                                 html.Div([
-                                    html.Label("Assets to show:"),
+                                    html.Label("Assets to show:", title="Pick which ones appear on the chart"),
                                     dcc.Dropdown(
                                         id="asset-dropdown",
-                                        options=[{"label": t, "value": t} for t in TICKERS],
+                                        options=[
+                                            {"label": f"{FRIENDLY[t]} ({t})", "value": t} for t in TICKERS
+                                        ],
                                         value=["BTC-USD", "AAPL"],
                                         multi=True,
-                                        style={"width": 260},
+                                        style={"width": 320},
                                     ),
                                 ]),
                             ],
                         ),
 
-                        html.Label("Date range:"),
+                        html.Label("Quick jump:"),
+                        dcc.RadioItems(
+                            id="preset-range",
+                            options=[
+                                {"label": "Full year", "value": "full"},
+                                {"label": "Last 3 months", "value": "3m"},
+                                {"label": "Last month", "value": "1m"},
+                            ],
+                            value="full",
+                            inline=True,
+                            className="preset-radio",
+                        ),
+
+                        html.Label("Date range:", style={"marginTop": 14}),
                         dcc.RangeSlider(
                             id="date-slider",
                             min=int(date_min.timestamp()),
@@ -181,6 +205,14 @@ app.layout = html.Div(
                     className="box chart-box",
                     children=[
                         dcc.Graph(id="main-chart"),
+                    ],
+                ),
+
+                html.Div(
+                    className="box insight-box",
+                    children=[
+                        html.H3("🔎 What does this mean?"),
+                        html.Div(id="insight-text"),
                     ],
                 ),
 
@@ -204,7 +236,25 @@ app.layout = html.Div(
 )
 
 # ------------------------------------------------------------
-# 5. Callback — connects both dropdowns and the slider to the chart
+# 5. Callback — quick-jump preset buttons control the date slider
+# ------------------------------------------------------------
+@app.callback(
+    Output("date-slider", "value"),
+    Input("preset-range", "value"),
+)
+def apply_preset(preset):
+    end = date_max
+    if preset == "3m":
+        start = max(date_min, end - pd.Timedelta(days=90))
+    elif preset == "1m":
+        start = max(date_min, end - pd.Timedelta(days=30))
+    else:
+        start = date_min
+    return [int(start.timestamp()), int(end.timestamp())]
+
+
+# ------------------------------------------------------------
+# 6. Callback — connects both dropdowns and the slider to the chart
 # ------------------------------------------------------------
 @app.callback(
     Output("main-chart", "figure"),
@@ -223,11 +273,11 @@ def update_chart(view, assets, date_range):
         window = raw.loc[start:end]
         window = (window / window.iloc[0] - 1) * 100
         y_title = "% Change from Start"
-        title = "BTC vs. AAPL vs. SPY: Normalized % Price Change"
+        title = "How each price moved over time"
     else:
         window = rolling_vol.loc[start:end]
-        y_title = "30-Day Rolling Volatility (%)"
-        title = "BTC vs. AAPL vs. SPY: Rolling 30-Day Volatility"
+        y_title = "Average Daily Swing (%)"
+        title = "How bumpy each ride was, day to day"
 
     fig = {
         "data": [
@@ -236,15 +286,15 @@ def update_chart(view, assets, date_range):
                 "y": window[a],
                 "type": "scatter",
                 "mode": "lines",
-                "name": a,
+                "name": FRIENDLY.get(a, a),
             }
             for a in assets if a in window.columns
         ],
         "layout": {
             "title": title,
             "xaxis": {"title": "Date"},
-            "yaxis": {"title": y_title},
-            "legend": {"title": {"text": "Asset"}},
+            "yaxis": {"title": y_title, "rangemode": "tozero"},
+            "legend": {"title": {"text": ""}},
             "annotations": [{
                 "text": "Source: Yahoo Finance",
                 "xref": "paper", "yref": "paper",
@@ -256,6 +306,62 @@ def update_chart(view, assets, date_range):
         },
     }
     return fig
+
+
+# ------------------------------------------------------------
+# 7. Callback — plain-English explanation of what's on screen
+# ------------------------------------------------------------
+@app.callback(
+    Output("insight-text", "children"),
+    Input("view-dropdown", "value"),
+    Input("asset-dropdown", "value"),
+    Input("date-slider", "value"),
+)
+def update_insight(view, assets, date_range):
+    if not assets:
+        return html.P("Pick at least one asset above to see what's going on.")
+
+    start = dt.datetime.fromtimestamp(date_range[0])
+    end = dt.datetime.fromtimestamp(date_range[1])
+
+    lines = []
+    metrics = {}
+
+    if view == "normalized":
+        window = raw.loc[start:end]
+        window = (window / window.iloc[0] - 1) * 100
+        for a in assets:
+            if a in window.columns:
+                val = window[a].iloc[-1]
+                metrics[a] = val
+                direction = "up" if val >= 0 else "down"
+                lines.append(html.P(f"{FRIENDLY.get(a, a)} went {direction} about {abs(val):.0f}% over this period."))
+    else:
+        window = rolling_vol.loc[start:end]
+        for a in assets:
+            if a in window.columns and window[a].notna().any():
+                val = window[a].mean()
+                metrics[a] = val
+                lines.append(html.P(
+                    f"{FRIENDLY.get(a, a)}'s price bounced around by about {val:.1f}% a day, on average."
+                ))
+
+    if "BTC-USD" in metrics and len(metrics) > 1:
+        other = next(a for a in metrics if a != "BTC-USD")
+        btc_val = abs(metrics["BTC-USD"]) or 0.01
+        other_val = abs(metrics[other]) or 0.01
+        ratio = btc_val / other_val
+        if ratio >= 1:
+            lines.append(html.P(
+                f"👉 Bottom line: Bitcoin was roughly {ratio:.1f}× more dramatic than "
+                f"{FRIENDLY.get(other, other)} over this stretch.",
+                className="insight-highlight",
+            ))
+
+    if not lines:
+        lines = [html.P("Not enough data in this range — try widening the date slider.")]
+
+    return lines
 
 
 if __name__ == "__main__":
