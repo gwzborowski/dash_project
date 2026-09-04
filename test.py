@@ -1,7 +1,7 @@
 # ============================================================
 # Mini Finance Dashboard — Crypto vs. Traditional Equity
-# Team #: [FILL IN]
-# Members: [FILL IN NAMES]
+# Team #: Group 3
+# Members: 
 #
 # Question / Story:
 #   How does Bitcoin's volatility compare to a blue-chip stock
