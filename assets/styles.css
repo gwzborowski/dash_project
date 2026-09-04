@@ -1,38 +1,47 @@
 /* ============================================================
-   styles.css — dark teal "chic" theme, inspired by a furniture
-   landing page reference. Dash auto-loads any CSS placed in
-   assets/, so this applies automatically once app.py runs.
+   We used Claude to help us set up the CSS for the dark teal 
+   theme. We prompted it some example color schemes and we agree
+   that it did a great job with the color scheme and the overall 
+   aesthetic of the page. Additionally, Claude was very helpful 
+   with adding little details to our dashboard like hovering 
+   effects.
    ============================================================ */
 
-:root{
-  --bg-deep:    #1E2E3B;   /* darkest corners */
-  --bg-page:    #2B4051;   /* main teal-navy background */
-  --bg-panel:   #34495C;   /* box background, one step lighter */
-  --bg-panel-2: #3D5568;   /* hover / secondary panel */
-  --line:       rgba(255, 255, 255, 0.10);
-  --text-light: #F6F3EC;   /* cream-white for headings/body */
-  --text-dim:   #C3CDD5;   /* muted blue-grey for secondary text */
-  --gold:       #CBA35C;   /* single warm accent, used sparingly */
-  --navy:       #1B2A44;   /* navy text used inside light dropdown/slider boxes */
+:root {
+  --bg-deep: #1e2e3b; /* darkest corners */
+  --bg-page: #2b4051; /* main teal-navy background */
+  --bg-panel: #34495c; /* box background, one step lighter */
+  --bg-panel-2: #3d5568; /* hover / secondary panel */
+  --line: rgba(255, 255, 255, 0.1);
+  --text-light: #f6f3ec; /* cream-white for headings/body */
+  --text-dim: #c3cdd5; /* muted blue-grey for secondary text */
+  --gold: #cba35c; /* single warm accent, used sparingly */
+  --navy: #1b2a44; /* navy text used inside light dropdown/slider boxes */
 }
 
-*{ box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-body{
+body {
   margin: 0;
-  background: radial-gradient(circle at 15% 10%, var(--bg-page) 0%, var(--bg-deep) 78%);
-  font-family: 'Manrope', sans-serif;
+  background: radial-gradient(
+    circle at 15% 10%,
+    var(--bg-page) 0%,
+    var(--bg-deep) 78%
+  );
+  font-family: "Manrope", sans-serif;
   color: var(--text-light);
 }
 
 /* ---------- Page frame ---------- */
-.page{
+.page {
   max-width: 960px;
   margin: 32px auto;
   padding: 4px;
 }
 
-.wrap{
+.wrap {
   background: linear-gradient(165deg, var(--bg-page) 0%, var(--bg-deep) 100%);
   border-radius: 32px;
   padding: clamp(28px, 5vw, 48px);
@@ -40,32 +49,32 @@ body{
 }
 
 /* ---------- Title ---------- */
-.page-title{
-  font-family: 'Playfair Display', serif;
+.page-title {
+  font-family: "Playfair Display", serif;
   font-weight: 700;
-  font-size: clamp(32px, 4.6vw, 50px);
+  font-size: clamp(32px, 4.6vw, 40px);
   line-height: 1.15;
   letter-spacing: -0.01em;
   color: var(--text-light);
   margin: 6px 0 28px;
 }
 
-h3{
-  font-family: 'Playfair Display', serif;
+h3 {
+  font-family: "Playfair Display", serif;
   font-weight: 600;
   font-size: 20px;
   color: var(--text-light);
   margin: 0 0 16px;
 }
 
-p{
+p {
   font-size: 14.5px;
   line-height: 1.65;
   color: var(--text-dim);
   margin: 0;
 }
 
-label{
+label {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -76,32 +85,38 @@ label{
 }
 
 /* ---------- Boxes ---------- */
-.box{
+.box {
   background: var(--bg-panel);
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 22px 26px;
   margin-bottom: 20px;
   box-shadow: 0 10px 24px rgba(10, 18, 26, 0.25);
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
-.box:hover{
+.box:hover {
   background: var(--bg-panel-2);
   transform: translateY(-2px);
 }
 
-.intro-box p{ margin: 0; }
+.intro-box p {
+  margin: 0;
+}
 
-.controls-box{ padding-bottom: 10px; }
+.controls-box {
+  padding-bottom: 10px;
+}
 
 /* Quick-jump preset buttons */
-.preset-radio{
+.preset-radio {
   display: flex;
   gap: 10px;
   margin: 6px 0 18px;
   flex-wrap: wrap;
 }
-.preset-radio label{
+.preset-radio label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -115,37 +130,47 @@ label{
   letter-spacing: normal;
   color: var(--text-light);
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
-.preset-radio label:hover{ border-color: var(--gold); }
-.preset-radio input{ accent-color: var(--gold); }
+.preset-radio label:hover {
+  border-color: var(--gold);
+}
+.preset-radio input {
+  accent-color: var(--gold);
+}
 
-.chart-box{ padding: 14px; }
+.chart-box {
+  padding: 14px;
+}
 
 /* Plain-English insight panel */
-.insight-box p{
+.insight-box p {
   color: var(--text-light);
   margin-bottom: 8px;
 }
-.insight-box p:last-child{ margin-bottom: 0; }
-.insight-highlight{
+.insight-box p:last-child {
+  margin-bottom: 0;
+}
+.insight-highlight {
   font-weight: 700;
   color: var(--gold) !important;
 }
 
-.image-box img{
+.image-box img {
   display: block;
   width: 100%;
   border-radius: 14px;
   box-shadow: 0 8px 20px rgba(10, 18, 26, 0.35);
 }
 
-.source-box{
+.source-box {
   display: inline-block;
   padding: 10px 20px;
   margin-bottom: 0;
 }
-.source-text{
+.source-text {
   font-size: 12px;
   color: var(--text-dim);
   margin: 0;
@@ -155,51 +180,65 @@ label{
 /* ---------- Dropdown restyle (react-select) ---------- */
 .Select-control,
 .dash-dropdown > div,
-div[class*="-control"]{
+div[class*="-control"] {
   background: var(--bg-page) !important;
   border: 1px solid var(--line) !important;
   border-radius: 10px !important;
   color: var(--navy) !important;
-  font-family: 'Manrope', sans-serif !important;
+  font-family: "Manrope", sans-serif !important;
 }
 .Select-menu-outer,
-div[class*="-menu"]{
+div[class*="-menu"] {
   background: var(--bg-panel) !important;
   color: var(--navy) !important;
 }
-.Select-value-label, .Select-placeholder, .Select-input > input,
+.Select-value-label,
+.Select-placeholder,
+.Select-input > input,
 div[class*="-singleValue"],
 div[class*="-placeholder"],
 div[class*="-Input"] input,
 div[class*="-option"],
 div[class*="-multiValue"] *,
-div[class*="-ValueContainer"] *{
+div[class*="-ValueContainer"] * {
   color: var(--navy) !important;
 }
 
 /* High-specificity override by component id, in case react-select's
    generated class names shift between Dash versions */
 #view-dropdown *,
-#asset-dropdown *{
+#asset-dropdown * {
   color: var(--navy) !important;
 }
 
 /* ---------- RangeSlider restyle ---------- */
-.rc-slider-track{ background: var(--gold) !important; }
-.rc-slider-rail{ background: rgba(255,255,255,0.15) !important; }
-.rc-slider-handle{
+.rc-slider-track {
+  background: var(--gold) !important;
+}
+.rc-slider-rail {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+.rc-slider-handle {
   border: 2px solid var(--gold) !important;
   background: var(--text-light) !important;
 }
-.rc-slider-dot{ border-color: rgba(255,255,255,0.25) !important; background: transparent !important; }
-.rc-slider-mark-text{ color: var(--text-dim) !important; font-size: 11px; }
-.rc-slider-tooltip-inner{ color: var(--navy) !important; }
+.rc-slider-dot {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  background: transparent !important;
+}
+.rc-slider-mark-text {
+  color: var(--text-dim) !important;
+  font-size: 11px;
+}
+.rc-slider-tooltip-inner {
+  color: var(--navy) !important;
+}
 
 /* Hide the raw timestamp input boxes rc-slider renders at each end —
    the formatted month marks along the track are enough on their own */
 .controls-box input[type="text"],
 .controls-box input[type="number"],
 .controls-box input[type="range"],
-.rc-slider-tooltip{
+.rc-slider-tooltip {
   display: none !important;
 }

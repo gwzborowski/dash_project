@@ -1,65 +1,76 @@
 # ============================================================
 # Mini Finance Dashboard — Crypto vs. Traditional Equity
-# Team #: Group 3
-# Members: 
+# Team: Group 3
+# Members: Chase LaRose, Gavin Zborowski, Evie Trinh, Alex Bailey
 #
 # Question / Story:
-#   How does Bitcoin's volatility compare to a blue-chip stock
-#   like AAPL over the same year? Crypto swings are much bigger,
-#   which makes for an easy-to-see, visually dramatic story.
+#   The purpose of this dashboard is to visualize Bitcoin, Apple, and
+#   the S&P500 price price changes over the past 12 months. Apple’s prices 
+#   are much more stable compared to Bitcoin’s prices which are more 
+#   volatile. 
 #
 # Data Choices:
-#   - BTC-USD (Bitcoin) and AAPL (Apple Inc.) over the past 1 year,
-#     pulled live via yfinance. SPY (S&P 500 ETF) is included as an
-#     optional third series so the viewer can see how the broader
-#     market compares as well.
+#   BTC-USD (Bitcoin) and AAPL (Apple Inc.) over the past 1 year,
+#   pulled live via yfinance. SPY (S&P 500 ETF) is included as an
+#   another third series so the viewer can see how the broader
+#   market compares as well.
 #
 # Interactivity:
+#   - A date-range slider lets the viewer zoom into a specific window
+#     and compare how each asset reacted. (Initial anticipated callback)
+#   
+#   We prompted Claude to implement these after the intial run for a 
+#   more polished and interactive dashboard experience.
 #   - A dropdown lets the viewer switch the chart between two views:
 #     "Normalized % Price Change" and "30-Day Rolling Volatility."
-#   - A second dropdown lets the viewer add/remove SPY from the chart.
-#   - A date-range slider lets the viewer zoom into a specific window
-#     (e.g. a crypto crash or rally) and compare how each asset reacted.
+#   - A second dropdown lets the viewer add/remove specific stocks from 
+#     the chart.
+#   
 #
 # Takeaway:
-#   Bitcoin's rolling volatility is consistently several multiples
-#   higher than AAPL's (and SPY's) throughout the year, including
-#   periods when the equities barely move. Visually, BTC's line looks
-#   jagged and mountainous while AAPL/SPY look almost flat by comparison.
+#   Bitcoin's volatility gap continues to show up every month even when 
+#   Apple’s stock prices are barely moving. Visually, Apple is perceived 
+#   as almost flat while Bitcoin’s prices are continuously jagged peaks.
 #
 # AI assistance:
-#   Used Claude to brainstorm the story angle (crypto vs. equity
-#   volatility), to help structure the normalized % change and rolling
-#   volatility calculations, to help write the callback connecting the
-#   dropdowns/slider to the chart, and to help write the axis/legend/
-#   source labeling and page title styling. All code was reviewed and
-#   understood before submission.
+#   We used Claude Pro to help us brainstorm ideas for our story angle, 
+#   structure data calculations and percent changes, write the callback 
+#   code on how to connect our interactive element with the chart, and 
+#   to write code for our style sheet and various labeling. Additionally, 
+#   Claude Pro was especially useful for problem solving for generating 
+#   the correct connection to Yahoo Finance. After Claude would provide 
+#   code, we made sure to review and understand each line before submission.  
+#
+#   All code was reviewed and understood before submission.
 # ============================================================
 
+from dash import Dash, html, dcc, Input, Output
+
+# Claude used these libraries to fetch, process, and visualize financial data
 import os
 import datetime as dt
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
+import yfinance as yf 
 import matplotlib
-matplotlib.use("Agg")  # render without a GUI backend
+matplotlib.use("Agg")  # Render without a GUI backend
 import matplotlib.pyplot as plt
 
-from dash import Dash, html, dcc, Input, Output
+# 1. Fetch data from the API
 
-# ------------------------------------------------------------
-# 1. Fetch data from the API (this runs every time the app starts)
-# ------------------------------------------------------------
 TICKERS = ["BTC-USD", "AAPL", "SPY"]
 PERIOD = "1y"
 
 raw = yf.download(TICKERS, period=PERIOD, auto_adjust=True)["Close"]
 raw = raw.dropna(how="all").ffill().dropna()
 
-# ------------------------------------------------------------
 # 2. Analytics touches
-# ------------------------------------------------------------
+# We used Claude to help us implement the analytics touches, 
+# including calculating daily returns,
+# calculating normalized percent changes, 
+# and rolling volatility.
+
 # (a) Daily % return
 daily_returns = raw.pct_change().dropna()
 
@@ -73,9 +84,8 @@ rolling_vol = daily_returns.rolling(ROLL_WINDOW).std() * 100  # in %
 # Annualized volatility summary (for the static image)
 annualized_vol = daily_returns.std() * np.sqrt(252) * 100  # in %
 
-# ------------------------------------------------------------
-# 3. Static image — matplotlib bar chart, saved to assets/
-# ------------------------------------------------------------
+# 3. Static image — matplotlib bar chart, saved to assets
+# We used Claude to help us create a static image summarizing the annualized volatility of BTC and AAPL.
 os.makedirs("assets", exist_ok=True)
 IMG_PATH = os.path.join("assets", "volatility_summary.png")
 
@@ -83,7 +93,7 @@ fig, ax = plt.subplots(figsize=(5, 4))
 bars = ax.bar(
     ["BTC-USD", "AAPL"],
     [annualized_vol["BTC-USD"], annualized_vol["AAPL"]],
-    color=["#f2a900", "#555555"],
+    color=["#dc6e6e", "#6699F1"],
 )
 ax.set_title("Annualized Volatility: BTC vs. AAPL")
 ax.set_ylabel("Annualized Volatility (%)")
@@ -97,13 +107,15 @@ fig.tight_layout()
 fig.savefig(IMG_PATH, dpi=150)
 plt.close(fig)
 
-# ------------------------------------------------------------
 # 4. Dash app layout
-# ------------------------------------------------------------
+# We used Claude to help us set up the Dash app layout,
+# especially organizing the layout into aesthetic sections 
+# and adding user-friendly labels for the dropdowns and controls.
+
 FONT_URL = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap"
 
 app = Dash(__name__, external_stylesheets=[FONT_URL])
-app.title = "Crypto vs. Traditional Equity"
+app.title = "Crypto Vs. Traditional Equity"
 
 date_min = raw.index.min()
 date_max = raw.index.max()
@@ -114,10 +126,11 @@ date_marks = {
 
 # Plain-language names so people who don't follow the stock market
 # can still tell what's being compared
+
 FRIENDLY = {
     "BTC-USD": "Bitcoin",
     "AAPL": "Apple",
-    "SPY": "the overall stock market (S&P 500)",
+    "SPY": "The overall stock market (S&P 500)",
 }
 
 app.layout = html.Div(
@@ -132,11 +145,9 @@ app.layout = html.Div(
                     className="box intro-box",
                     children=[
                         html.P(
-                            "Ever wonder why Bitcoin headlines are always so dramatic? This chart "
-                            "shows you why — it lines up Bitcoin's price next to Apple, one of the "
-                            "world's steadiest stocks, so you can watch the difference for yourself. "
-                            "No finance background needed: just pick a view below and see how wild "
-                            "(or calm) each one gets."
+                            "The purpose of this dashboard is to visualize Bitcoin’s price to "
+                            "Apple’s Stock price over a 12 month period. Apple’s prices are "
+                            "much more stable compared to Bitcoin’s prices which are more volatile."
                         ),
                     ],
                 ),
@@ -195,8 +206,7 @@ app.layout = html.Div(
                             max=int(date_max.timestamp()),
                             value=[int(date_min.timestamp()), int(date_max.timestamp())],
                             marks=date_marks,
-                            step=86400,  # one day
-                            tooltip={"placement": "bottom", "always_visible": False},
+                            step=86400,
                         ),
                     ],
                 ),
@@ -235,9 +245,13 @@ app.layout = html.Div(
     ],
 )
 
-# ------------------------------------------------------------
-# 5. Callback — quick-jump preset buttons control the date slider
-# ------------------------------------------------------------
+# 5. Callbacks
+# We used Claude to help us set up 3 callbacks for adjusting the 
+# date range for the interactive chart. Claude came up with one
+# which was very interesting: letting the user change the view
+# being either price percentage changes or average daily swing
+
+# Callback — quick-jump preset buttons control the date slider
 @app.callback(
     Output("date-slider", "value"),
     Input("preset-range", "value"),
@@ -252,10 +266,7 @@ def apply_preset(preset):
         start = date_min
     return [int(start.timestamp()), int(end.timestamp())]
 
-
-# ------------------------------------------------------------
-# 6. Callback — connects both dropdowns and the slider to the chart
-# ------------------------------------------------------------
+# Callback — connects both dropdowns and the slider to the chart
 @app.callback(
     Output("main-chart", "figure"),
     Input("view-dropdown", "value"),
@@ -291,9 +302,9 @@ def update_chart(view, assets, date_range):
             for a in assets if a in window.columns
         ],
         "layout": {
-            "title": title,
-            "xaxis": {"title": "Date"},
-            "yaxis": {"title": y_title, "rangemode": "tozero"},
+            "title": {"text": title},
+            "xaxis": {"title": {"text": "Date"}},
+            "yaxis": {"title": {"text": y_title}, "rangemode": "tozero"},
             "legend": {"title": {"text": ""}},
             "annotations": [{
                 "text": "Source: Yahoo Finance",
@@ -307,10 +318,7 @@ def update_chart(view, assets, date_range):
     }
     return fig
 
-
-# ------------------------------------------------------------
-# 7. Callback — plain-English explanation of what's on screen
-# ------------------------------------------------------------
+# Callback — plain-English explanation of what's on screen
 @app.callback(
     Output("insight-text", "children"),
     Input("view-dropdown", "value"),
@@ -362,7 +370,6 @@ def update_insight(view, assets, date_range):
         lines = [html.P("Not enough data in this range — try widening the date slider.")]
 
     return lines
-
 
 if __name__ == "__main__":
     app.run(debug=True)
