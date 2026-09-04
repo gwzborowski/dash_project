@@ -199,6 +199,7 @@ div[class*="-ValueContainer"] *{
    the formatted month marks along the track are enough on their own */
 .controls-box input[type="text"],
 .controls-box input[type="number"],
+.controls-box input[type="range"],
 .rc-slider-tooltip{
   display: none !important;
 }
